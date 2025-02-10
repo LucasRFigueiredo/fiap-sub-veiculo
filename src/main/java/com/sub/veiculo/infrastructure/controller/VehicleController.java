@@ -44,4 +44,6 @@ public class VehicleController {
     public void delete(@PathVariable Long id) {
         service.removeVehicle(id);
     }
+
+    //teste pr
 }
