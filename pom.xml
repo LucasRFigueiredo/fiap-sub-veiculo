@@ -111,7 +111,6 @@
 								<exclude>com/sub/veiculo/infrastructure/configuration/**</exclude>
 								<exclude>com/sub/veiculo/exception/**</exclude>
 								<exclude>com/sub/veiculo/infrastructure/client/**</exclude>
-								<exclude>com/sub/veiculo/infrastructure/adapter/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -125,7 +124,6 @@
 								<exclude>com/sub/veiculo/infrastructure/configuration/**</exclude>
 								<exclude>com/sub/veiculo/exception/**</exclude>
 								<exclude>com/sub/veiculo/infrastructure/client/**</exclude>
-								<exclude>com/sub/veiculo/infrastructure/adapter/**</exclude>
 							</excludes>
 							<rules>
 								<rule>
