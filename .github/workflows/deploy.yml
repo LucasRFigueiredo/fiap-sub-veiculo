@@ -1,4 +1,4 @@
-name: Build and Deploy to ECR
+name: Build and Push Docker Image
 
 on:
   push:
@@ -6,36 +6,23 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
-
-    env:
-      ECR_REPOSITORY: veiculos-roque
-      IMAGE_TAG: latest
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          java-version: '21'
+          distribution: 'temurin'
 
-      - name: Login no Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build com Maven
+        run: mvn clean package -DskipTests
 
-      - name: Build da imagem Docker
+      - name: Construir e enviar imagem Docker
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-
-      - name: Marcar a imagem
-        run: |
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Push para o Amazon ECR
-        run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/veiculos-roque:${{ github.sha }} .
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/veiculos-roque:${{ github.sha }}
