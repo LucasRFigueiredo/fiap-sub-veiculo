@@ -21,14 +21,25 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: 🔐 Login no AWS ECR
+        id: login-ecr
         run: |
+          echo "Logando no ECR..."
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-      - name: 🏗️ Construir e Taggear a Imagem Docker
+      - name: 🏗️ Construir a Imagem Docker
+        id: build-image
         run: |
+          echo "Construindo a imagem Docker..."
           docker build -t ${{ secrets.ECR_REPOSITORY }}:latest .
+
+      - name: 🏷️ Taggear a Imagem Docker
+        id: tag-image
+        run: |
+          echo "Taggeando a imagem Docker..."
           docker tag ${{ secrets.ECR_REPOSITORY }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
       - name: 🚀 Enviar imagem Docker para o ECR
+        id: push-image
         run: |
+          echo "Enviando a imagem Docker para o ECR..."
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
