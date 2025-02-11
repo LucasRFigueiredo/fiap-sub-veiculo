@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -20,7 +21,7 @@ public class VehicleController {
     @PostMapping
     public Vehicle create(@Valid @RequestBody VehicleRequestDTO dto) {
         Vehicle vehicle = new Vehicle(
-                null,  // O ID será gerado automaticamente
+                null,
                 dto.getMarca(),
                 dto.getModelo(),
                 dto.getAno(),
@@ -38,6 +39,18 @@ public class VehicleController {
     @GetMapping
     public List<Vehicle> list() {
         return service.listVehicles();
+    }
+
+    @PostMapping("/batch")
+    public List<Vehicle> getVehiclesByIds(@RequestBody List<Long> ids) {
+        return service.listVehiclesByIds(ids);
+    }
+
+    @GetMapping("/ordenados")
+    public List<Vehicle> listOrderedByPrice() {
+        return service.listVehicles().stream()
+                .sorted((v1, v2) -> Double.compare(v1.getPreco(), v2.getPreco()))
+                .collect(Collectors.toList());
     }
 
     @DeleteMapping("/{id}")

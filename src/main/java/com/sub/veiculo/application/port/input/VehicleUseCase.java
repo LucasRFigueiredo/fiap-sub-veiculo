@@ -9,4 +9,5 @@ public interface VehicleUseCase {
     List<Vehicle> listVehicles();
     void removeVehicle(Long id);
     Vehicle updateVehicle(Long id, Vehicle vehicle);
+    List<Vehicle> listVehiclesByIds(List<Long> ids);
 }

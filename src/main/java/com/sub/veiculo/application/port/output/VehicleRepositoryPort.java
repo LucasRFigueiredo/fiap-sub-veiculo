@@ -8,5 +8,6 @@ public interface VehicleRepositoryPort {
     Vehicle save(Vehicle vehicle);
     Optional<Vehicle> findById(Long id);
     List<Vehicle> findAll();
+    List<Vehicle> findAllByIds(List<Long> ids);
     void deleteById(Long id);
 }
