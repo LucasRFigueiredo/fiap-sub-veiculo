@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VehicleService implements VehicleUseCase {
@@ -42,5 +43,14 @@ public class VehicleService implements VehicleUseCase {
             return repository.save(updatedVehicle);
         }
         return null;
+    }
+
+    @Override
+    public List<Vehicle> listVehiclesByIds(List<Long> ids) {
+        return ids.stream()
+                .map(repository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 }

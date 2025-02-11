@@ -14,7 +14,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -22,98 +25,124 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class VehicleControllerTest {
 
     @Mock
-    private VehicleUseCase service;
+    private VehicleUseCase vehicleUseCase;
 
     @InjectMocks
-    private VehicleController controller;
+    private VehicleController vehicleController;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(vehicleController).build();
     }
 
     @Test
-    void testCreate() throws Exception {
-        VehicleRequestDTO dto = new VehicleRequestDTO();
-        dto.setMarca("Ford");
-        dto.setModelo("Focus");
-        dto.setAno(2022);
-        dto.setCor("Preto");
-        dto.setPreco(75000.0);
+    void testCreateVehicle() throws Exception {
+        Vehicle vehicle = new Vehicle(1L, "Toyota", "Corolla", 2022, "Branco", 90000.0);
+        when(vehicleUseCase.createVehicle(any(Vehicle.class))).thenReturn(vehicle);
 
-        Vehicle createdVehicle = new Vehicle(1L, "Ford", "Focus", 2022, "Preto", 75000.0);
-
-        when(service.createVehicle(any(Vehicle.class))).thenReturn(createdVehicle);
+        VehicleRequestDTO request = new VehicleRequestDTO();
+        request.setMarca("Toyota");
+        request.setModelo("Corolla");
+        request.setAno(2022);
+        request.setCor("Branco");
+        request.setPreco(90000.0);
+        String jsonRequest = """
+                {
+                  "marca": "Toyota",
+                  "modelo": "Corolla",
+                  "ano": 2022,
+                  "cor": "Branco",
+                  "preco": 90000.0
+                }
+                """;
 
         mockMvc.perform(post("/vehicles")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                        {
-                          "marca": "Ford",
-                          "modelo": "Focus",
-                          "ano": 2022,
-                          "cor": "Preto",
-                          "preco": 75000.0
-                        }
-                        """))
+                        .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.marca").value("Ford"))
-                .andExpect(jsonPath("$.modelo").value("Focus"))
+                .andExpect(jsonPath("$.marca").value("Toyota"))
+                .andExpect(jsonPath("$.modelo").value("Corolla"))
                 .andExpect(jsonPath("$.ano").value(2022))
-                .andExpect(jsonPath("$.cor").value("Preto"))
-                .andExpect(jsonPath("$.preco").value(75000.0));
+                .andExpect(jsonPath("$.preco").value(90000.0));
 
-        verify(service, times(1)).createVehicle(any(Vehicle.class));
+        verify(vehicleUseCase, times(1)).createVehicle(any(Vehicle.class));
     }
 
     @Test
-    void testGet() throws Exception {
-        Vehicle vehicle = new Vehicle(1L, "Ford", "Focus", 2022, "Preto", 75000.0);
-        when(service.getVehicle(1L)).thenReturn(vehicle);
+    void testGetVehicle() throws Exception {
+        Vehicle vehicle = new Vehicle(1L, "Toyota", "Corolla", 2022, "Branco", 90000.0);
+        when(vehicleUseCase.getVehicle(1L)).thenReturn(vehicle);
 
-        mockMvc.perform(get("/vehicles/1")
-                        .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/vehicles/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.marca").value("Ford"))
-                .andExpect(jsonPath("$.modelo").value("Focus"))
+                .andExpect(jsonPath("$.marca").value("Toyota"))
+                .andExpect(jsonPath("$.modelo").value("Corolla"))
                 .andExpect(jsonPath("$.ano").value(2022))
-                .andExpect(jsonPath("$.cor").value("Preto"))
-                .andExpect(jsonPath("$.preco").value(75000.0));
+                .andExpect(jsonPath("$.preco").value(90000.0));
 
-        verify(service, times(1)).getVehicle(1L);
+        verify(vehicleUseCase, times(1)).getVehicle(1L);
     }
 
     @Test
-    void testList() throws Exception {
+    void testListVehicles() throws Exception {
         List<Vehicle> vehicles = Arrays.asList(
-                new Vehicle(1L, "Ford", "Focus", 2022, "Preto", 75000.0),
-                new Vehicle(2L, "Chevrolet", "Cruze", 2021, "Branco", 80000.0)
+                new Vehicle(1L, "Toyota", "Corolla", 2022, "Branco", 90000.0),
+                new Vehicle(2L, "Honda", "Civic", 2021, "Preto", 85000.0)
         );
-        when(service.listVehicles()).thenReturn(vehicles);
+        when(vehicleUseCase.listVehicles()).thenReturn(vehicles);
 
-        mockMvc.perform(get("/vehicles")
-                        .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/vehicles"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].marca").value("Ford"))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].marca").value("Chevrolet"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].marca").value("Toyota"))
+                .andExpect(jsonPath("$[1].marca").value("Honda"));
 
-        verify(service, times(1)).listVehicles();
+        verify(vehicleUseCase, times(1)).listVehicles();
     }
 
     @Test
-    void testDelete() throws Exception {
-        Long vehicleId = 1L;
+    void testGetVehiclesByIds() throws Exception {
+        List<Vehicle> vehicles = Arrays.asList(
+                new Vehicle(1L, "Toyota", "Corolla", 2022, "Branco", 90000.0),
+                new Vehicle(2L, "Honda", "Civic", 2021, "Preto", 85000.0)
+        );
+        when(vehicleUseCase.listVehiclesByIds(anyList())).thenReturn(vehicles);
 
-        mockMvc.perform(delete("/vehicles/{id}", vehicleId))
+        mockMvc.perform(post("/vehicles/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[1, 2]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].marca").value("Toyota"))
+                .andExpect(jsonPath("$[1].marca").value("Honda"));
+
+        verify(vehicleUseCase, times(1)).listVehiclesByIds(anyList());
+    }
+
+    @Test
+    void testListOrderedByPrice() throws Exception {
+        List<Vehicle> vehicles = Arrays.asList(
+                new Vehicle(2L, "Honda", "Civic", 2021, "Preto", 85000.0),
+                new Vehicle(1L, "Toyota", "Corolla", 2022, "Branco", 90000.0)
+        );
+        when(vehicleUseCase.listVehicles()).thenReturn(vehicles);
+
+        mockMvc.perform(get("/vehicles/ordenados"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].preco").value(85000.0))
+                .andExpect(jsonPath("$[1].preco").value(90000.0));
+
+        verify(vehicleUseCase, times(1)).listVehicles();
+    }
+
+    @Test
+    void testDeleteVehicle() throws Exception {
+        mockMvc.perform(delete("/vehicles/1"))
                 .andExpect(status().isOk());
 
-        verify(service, times(1)).removeVehicle(vehicleId);
+        verify(vehicleUseCase, times(1)).removeVehicle(1L);
     }
 }

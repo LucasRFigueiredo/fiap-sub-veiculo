@@ -22,32 +22,41 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
         VehicleEntity entity = new VehicleEntity();
         BeanUtils.copyProperties(vehicle, entity);
         VehicleEntity savedEntity = jpaRepository.save(entity);
-        Vehicle savedVehicle = new Vehicle(
-                savedEntity.getId(), savedEntity.getMarca(), savedEntity.getModelo(),
-                savedEntity.getAno(), savedEntity.getCor(), savedEntity.getPreco()
-        );
-        return savedVehicle;
+        return toModel(savedEntity);
     }
 
     @Override
     public Optional<Vehicle> findById(Long id) {
-        return jpaRepository.findById(id)
-                .map(entity -> new Vehicle(
-                        entity.getId(), entity.getMarca(), entity.getModelo(),
-                        entity.getAno(), entity.getCor(), entity.getPreco()));
+        return jpaRepository.findById(id).map(this::toModel);
     }
 
     @Override
     public List<Vehicle> findAll() {
         return jpaRepository.findAll().stream()
-                .map(entity -> new Vehicle(
-                        entity.getId(), entity.getMarca(), entity.getModelo(),
-                        entity.getAno(), entity.getCor(), entity.getPreco()))
+                .map(this::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Vehicle> findAllByIds(List<Long> ids) {
+        return jpaRepository.findAllById(ids).stream()
+                .map(this::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(Long id) {
         jpaRepository.deleteById(id);
+    }
+
+    private Vehicle toModel(VehicleEntity entity) {
+        return new Vehicle(
+                entity.getId(),
+                entity.getMarca(),
+                entity.getModelo(),
+                entity.getAno(),
+                entity.getCor(),
+                entity.getPreco()
+        );
     }
 }
