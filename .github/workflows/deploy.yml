@@ -22,6 +22,10 @@ jobs:
       - name: Build com Maven
         run: mvn clean package -DskipTests
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: 🏗️ Construir e Taggear a Imagem Docker
         run: |
           docker build -t ${{ secrets.ECR_REPOSITORY }}:latest .
