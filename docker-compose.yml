@@ -21,9 +21,9 @@ services:
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/veiculos_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: yourpassword
+      SPRING_DATASOURCE_URL: jdbc:postgresql://my-db-fiap.czmuka4aqktq.us-east-1.rds.amazonaws.com:5432/postgres
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
     ports:
       - "8080:8080"
 
