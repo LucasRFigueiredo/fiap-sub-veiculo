@@ -145,4 +145,32 @@ class VehicleControllerTest {
 
         verify(vehicleUseCase, times(1)).removeVehicle(1L);
     }
+
+    @Test
+    void testUpdateVehicle() throws Exception {
+        Vehicle updatedVehicle = new Vehicle(1L, "Toyota", "Corolla", 2023, "Azul", 95000.0);
+        when(vehicleUseCase.updateVehicle(eq(1L), any(Vehicle.class))).thenReturn(updatedVehicle);
+
+        String jsonRequest = """
+        {
+          "marca": "Toyota",
+          "modelo": "Corolla",
+          "ano": 2023,
+          "cor": "Azul",
+          "preco": 95000.0
+        }
+        """;
+
+        mockMvc.perform(put("/vehicles/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.marca").value("Toyota"))
+                .andExpect(jsonPath("$.modelo").value("Corolla"))
+                .andExpect(jsonPath("$.ano").value(2023))
+                .andExpect(jsonPath("$.cor").value("Azul"))
+                .andExpect(jsonPath("$.preco").value(95000.0));
+
+        verify(vehicleUseCase, times(1)).updateVehicle(eq(1L), any(Vehicle.class));
+    }
 }
