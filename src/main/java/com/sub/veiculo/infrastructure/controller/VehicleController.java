@@ -41,6 +41,19 @@ public class VehicleController {
         return service.listVehicles();
     }
 
+    @PutMapping("/{id}")
+    public Vehicle update(@PathVariable Long id, @Valid @RequestBody VehicleRequestDTO dto) {
+        Vehicle updatedVehicle = new Vehicle(
+                id,
+                dto.getMarca(),
+                dto.getModelo(),
+                dto.getAno(),
+                dto.getCor(),
+                dto.getPreco()
+        );
+        return service.updateVehicle(id, updatedVehicle);
+    }
+
     @PostMapping("/batch")
     public List<Vehicle> getVehiclesByIds(@RequestBody List<Long> ids) {
         return service.listVehiclesByIds(ids);
